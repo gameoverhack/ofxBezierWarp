@@ -106,7 +106,7 @@ void ofxBezierWarp::draw(float x, float y){
 //--------------------------------------------------------------
 void ofxBezierWarp::draw(float x, float y, float w, float h){
 
-    //if(!fbo.isAllocated()) return;
+    if(!fbo.isAllocated()) return;
 
     // upload the bezier control points to the map surface
     // this can be done just once (or when control points change)
