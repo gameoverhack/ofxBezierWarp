@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<ItemGroup>
+		<ClCompile Include="src\testApp.cpp">
+			<Filter>src</Filter>
+		</ClCompile>
+		<ClCompile Include="src\main.cpp">
+			<Filter>src</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\..\addons\ofxBezierWarp\src\ofxBezierWarp.cpp">
+			<Filter>addons\ofxBezierWarp\src</Filter>
+		</ClCompile>
+	</ItemGroup>
+	<ItemGroup>
+		<Filter Include="src">
+			<UniqueIdentifier>{d8376475-7454-4a24-b08a-aac121d3ad6f}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="addons">
+			<UniqueIdentifier>{71834f65-f3a9-211e-73b8-dc8563776aec}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="addons\ofxBezierWarp">
+			<UniqueIdentifier>{8d575a6d-76f4-902a-c094-c61dd966ffe7}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="addons\ofxBezierWarp\src">
+			<UniqueIdentifier>{a5dd9ea4-bcc8-6add-a6b9-7b93db3469f6}</UniqueIdentifier>
+		</Filter>
+	</ItemGroup>
+	<ItemGroup>
+		<ClInclude Include="src\testApp.h">
+			<Filter>src</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\..\addons\ofxBezierWarp\src\ofxBezierWarp.h">
+			<Filter>addons\ofxBezierWarp\src</Filter>
+		</ClInclude>
+	</ItemGroup>
+</Project>
