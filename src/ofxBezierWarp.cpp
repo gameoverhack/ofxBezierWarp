@@ -51,6 +51,7 @@ ofxBezierWarp::ofxBezierWarp(){
     warpHeight = 0;
     bShowWarpGrid = false;
     bWarpPositionDiff = false;
+    bDoWarp = true;
 }
 
 //--------------------------------------------------------------
@@ -133,24 +134,29 @@ void ofxBezierWarp::draw(float x, float y, float w, float h){
 
     if(!fbo.isAllocated()) return;
 
-    // upload the bezier control points to the map surface
-    // this can be done just once (or when control points change)
-    // if there is only one bezier surface - but with multiple
-    // it needs to be done every frame
-    glMap2f(GL_MAP2_VERTEX_3, 0, 1, 3, numXPoints, 0, 1, numXPoints * 3, numYPoints, &(cntrlPoints[0]));
-
     ofPushMatrix();
 
-    ofTranslate(x, y);
-    ofScale(w/width, h/height);
-
-    ofTexture & fboTex = fbo.getTextureReference();
-
-    fboTex.bind();
-    {
-        glEvalMesh2(GL_FILL, 0, gridDivX, 0, gridDivY);
+    if(bDoWarp){
+        
+        ofTranslate(x, y);
+        ofScale(w/width, h/height);
+        
+        ofTexture & fboTex = fbo.getTextureReference();
+        
+        // upload the bezier control points to the map surface
+        // this can be done just once (or when control points change)
+        // if there is only one bezier surface - but with multiple
+        // it needs to be done every frame
+        glMap2f(GL_MAP2_VERTEX_3, 0, 1, 3, numXPoints, 0, 1, numXPoints * 3, numYPoints, &(cntrlPoints[0]));
+        
+        fboTex.bind();
+        {
+            glEvalMesh2(GL_FILL, 0, gridDivX, 0, gridDivY);
+        }
+        fboTex.unbind();
+    }else{
+        fbo.draw(x, y, w, h);
     }
-    fboTex.unbind();
 
     ofPopMatrix();
 
@@ -305,6 +311,21 @@ void ofxBezierWarp::setShowWarpGrid(bool b){
 //--------------------------------------------------------------
 bool ofxBezierWarp::getShowWarpGrid(){
     return bShowWarpGrid;
+}
+
+//--------------------------------------------------------------
+void ofxBezierWarp::setDoWarp(bool b){
+    bDoWarp = b;
+}
+
+//--------------------------------------------------------------
+bool ofxBezierWarp::getDoWarp(){
+    return bDoWarp;
+}
+
+//--------------------------------------------------------------
+void ofxBezierWarp::toggleDoWarp(){
+    bDoWarp = !bDoWarp;
 }
 
 //--------------------------------------------------------------

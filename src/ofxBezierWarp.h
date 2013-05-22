@@ -77,6 +77,10 @@ public:
     void setShowWarpGrid(bool b);
     bool getShowWarpGrid();
     
+    void toggleDoWarp();
+    void setDoWarp(bool b);
+    bool getDoWarp();
+    
     ofFbo& getFBO();
     
     ofTexture& getTextureReference();
@@ -97,6 +101,7 @@ protected:
     
     bool bShowWarpGrid;
     bool bWarpPositionDiff;
+    bool bDoWarp;
     
     ofFbo fbo;
     
