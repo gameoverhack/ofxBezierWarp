@@ -61,12 +61,12 @@ ofxBezierWarp::~ofxBezierWarp(){
 }
 
 //--------------------------------------------------------------
-void ofxBezierWarp::allocate(int _w, int _h){
-    allocate(_w, _h, 2, 2, 100.0f);
+void ofxBezierWarp::allocate(int _w, int _h, int pixelFormat){
+    allocate(_w, _h, 2, 2, 100.0f, pixelFormat);
 }
 
 //--------------------------------------------------------------
-void ofxBezierWarp::allocate(int _w, int _h, int _numXPoints, int _numYPoints, float pixelsPerGridDivision){
+void ofxBezierWarp::allocate(int _w, int _h, int _numXPoints, int _numYPoints, float pixelsPerGridDivision, int pixelFormat){
 
     //disable arb textures (so we use texture 2d instead)
     ofDisableArbTex();
@@ -85,7 +85,7 @@ void ofxBezierWarp::allocate(int _w, int _h, int _numXPoints, int _numYPoints, f
         width = _w;
         height = _h;
 
-        fbo.allocate(ofNextPow2(width), ofNextPow2(height));
+        fbo.allocate(ofNextPow2(width), ofNextPow2(height), pixelFormat);
         ofLogVerbose() << "Allocating bezier fbo texture as: " << fbo.getWidth() << " x " << fbo.getHeight();
     }
 

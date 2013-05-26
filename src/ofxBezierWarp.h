@@ -45,8 +45,8 @@ public:
     ofxBezierWarp();
     ~ofxBezierWarp();
     
-    void allocate(int w, int h);
-    void allocate(int w, int h, int numXPoints, int numYPoints, float pixelsPerGridDivision);
+    void allocate(int w, int h, int pixelFormat = GL_BGRA);
+    void allocate(int w, int h, int numXPoints, int numYPoints, float pixelsPerGridDivision, int pixelFormat = GL_BGRA);
     
     void begin();
     void end();
