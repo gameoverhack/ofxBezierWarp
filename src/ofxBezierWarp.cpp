@@ -43,8 +43,6 @@ ofxBezierWarp::ofxBezierWarp(){
     currentCntrlY = -1;
     numXPoints = 0;
     numYPoints = 0;
-    width = 0;
-    height = 0;
     warpX = 0;
     warpY = 0;
     warpWidth = 0;
@@ -69,23 +67,15 @@ void ofxBezierWarp::allocate(int _w, int _h, int pixelFormat){
 void ofxBezierWarp::allocate(int _w, int _h, int _numXPoints, int _numYPoints, float pixelsPerGridDivision, int pixelFormat){
 
     //disable arb textures (so we use texture 2d instead)
-    ofDisableArbTex();
 
     if(_w == 0 || _h == 0 || _numXPoints == 0 || _numYPoints == 0){
         ofLogError() << "Cannot accept 0 as value for w, h numXPoints or numYPoints";
         return;
     }
 
-    if(_w != width || _h != height){
+    if(_w != fbo.getWidth() || _h != fbo.getHeight()){
 
-        // the fbo texture needs to be a power of 2 because
-        // we are using TEXTURE_2D instead of ARB textures
-        // so we store requested width and height seperately
-
-        width = _w;
-        height = _h;
-
-        fbo.allocate(ofNextPow2(width), ofNextPow2(height), pixelFormat);
+        fbo.allocate(_w, _h, pixelFormat);
         ofLogVerbose() << "Allocating bezier fbo texture as: " << fbo.getWidth() << " x " << fbo.getHeight();
     }
 
@@ -99,7 +89,6 @@ void ofxBezierWarp::allocate(int _w, int _h, int _numXPoints, int _numYPoints, f
 
     setWarpGridResolution(pixelsPerGridDivision);
     
-    ofEnableArbTex();
     //glShadeModel(GL_FLAT);
 
 }
@@ -108,7 +97,6 @@ void ofxBezierWarp::allocate(int _w, int _h, int _numXPoints, int _numYPoints, f
 void ofxBezierWarp::begin(){
     fbo.begin();
     ofPushMatrix();
-    ofScale(fbo.getWidth()/width, fbo.getHeight()/height, 1.0f);
     glClearColor(0.0, 0.0, 0.0, 1.0);
     glClear(GL_COLOR_BUFFER_BIT);
 }
@@ -121,12 +109,12 @@ void ofxBezierWarp::end(){
 
 //--------------------------------------------------------------
 void ofxBezierWarp::draw(){
-    draw(0, 0, width, height);
+    draw(0, 0, fbo.getWidth(), fbo.getHeight());
 }
 
 //--------------------------------------------------------------
 void ofxBezierWarp::draw(float x, float y){
-    draw(x, y, width, height);
+    draw(x, y, fbo.getWidth(), fbo.getHeight());
 }
 
 //--------------------------------------------------------------
@@ -139,7 +127,7 @@ void ofxBezierWarp::draw(float x, float y, float w, float h){
     if(bDoWarp){
         
         ofTranslate(x, y);
-        ofScale(w/width, h/height);
+        ofScale(w/fbo.getWidth(), h/fbo.getHeight());
         
         ofTexture & fboTex = fbo.getTextureReference();
         
@@ -150,12 +138,30 @@ void ofxBezierWarp::draw(float x, float y, float w, float h){
         glMap2f(GL_MAP2_VERTEX_3, 0, 1, 3, numXPoints, 0, 1, numXPoints * 3, numYPoints, &(cntrlPoints[0]));
         
         fboTex.bind();
-        {
-            glEvalMesh2(GL_FILL, 0, gridDivX, 0, gridDivY);
-        }
+        
+        glMatrixMode(GL_TEXTURE);
+        glPushMatrix();
+        glLoadIdentity();
+        
+        glScalef(fboTex.getWidth(), fboTex.getHeight(), 1.0f);
+        glMatrixMode(GL_MODELVIEW);
+        
+//      glEnable(GL_MAP2_VERTEX_3);
+//      glEnable(GL_AUTO_NORMAL);
+        glEvalMesh2(GL_FILL, 0, gridDivX, 0, gridDivY);
+//      glDisable(GL_MAP2_VERTEX_3);
+//      glDisable(GL_AUTO_NORMAL);
+        
         fboTex.unbind();
+        
+        glMatrixMode(GL_TEXTURE);
+        glPopMatrix();
+        glMatrixMode(GL_MODELVIEW);
+        
     }else{
+        
         fbo.draw(x, y, w, h);
+        
     }
 
     ofPopMatrix();
@@ -177,10 +183,14 @@ void ofxBezierWarp::drawWarpGrid(float x, float y, float w, float h){
 
     ofSetColor(255, 255, 255);
     ofTranslate(x, y);
-    ofScale(w/width, h/height);
+    ofScale(w/fbo.getWidth(), h/fbo.getHeight());
 
+//    glEnable(GL_MAP2_VERTEX_3);
+//    glEnable(GL_AUTO_NORMAL);
     glEvalMesh2(GL_LINE, 0, gridDivX, 0, gridDivY);
-
+//    glDisable(GL_MAP2_VERTEX_3);
+//    glDisable(GL_AUTO_NORMAL);
+    
     for(int i = 0; i < numYPoints; i++){
         for(int j = 0; j < numXPoints; j++){
             ofFill();
@@ -213,9 +223,9 @@ void ofxBezierWarp::setWarpGrid(int _numXPoints, int _numYPoints, bool forceRese
         cntrlPoints.resize(numXPoints * numYPoints * 3);
         for(int i = 0; i < numYPoints; i++){
             GLfloat x, y;
-            y = (height / (numYPoints - 1)) * i;
+            y = (fbo.getHeight() / (numYPoints - 1)) * i;
             for(int j = 0; j < numXPoints; j++){
-                x = (width / (numXPoints - 1)) * j;
+                x = (fbo.getWidth() / (numXPoints - 1)) * j;
                 cntrlPoints[(i*numXPoints+j)*3+0] = x;
                 cntrlPoints[(i*numXPoints+j)*3+1] = y;
                 cntrlPoints[(i*numXPoints+j)*3+2] = 0;
@@ -265,12 +275,12 @@ void ofxBezierWarp::resetWarpGridPosition(){
 
 //--------------------------------------------------------------
 float ofxBezierWarp::getWidth(){
-    return width;
+    return fbo.getWidth();
 }
 
 //--------------------------------------------------------------
 float ofxBezierWarp::getHeight(){
-    return height;
+    return fbo.getHeight();
 }
 
 //--------------------------------------------------------------
@@ -369,8 +379,8 @@ void ofxBezierWarp::mouseDragged(ofMouseEventArgs & e){
     float y = e.y;
 
     if(bWarpPositionDiff){
-        x = (e.x - warpX) * width/warpWidth;
-        y = (e.y - warpY) * height/warpHeight;
+        x = (e.x - warpX) * fbo.getWidth()/warpWidth;
+        y = (e.y - warpY) * fbo.getHeight()/warpHeight;
     }
 
     if(currentCntrlX != -1 && currentCntrlY != -1){
@@ -389,8 +399,8 @@ void ofxBezierWarp::mousePressed(ofMouseEventArgs & e){
     float y = e.y;
 
     if(bWarpPositionDiff){
-        x = (e.x - warpX) * width/warpWidth;
-        y = (e.y - warpY) * height/warpHeight;
+        x = (e.x - warpX) * fbo.getWidth()/warpWidth;
+        y = (e.y - warpY) * fbo.getHeight()/warpHeight;
     }
 
     float dist = 10.0f;
