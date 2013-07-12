@@ -167,6 +167,8 @@ void ofxBezierWarp::draw(float x, float y, float w, float h){
             setWarpGridPosition(x, y, w, h);
         }
     }
+    
+    glFlush();
 }
 
 //--------------------------------------------------------------
