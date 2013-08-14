@@ -105,9 +105,6 @@ protected:
     
     ofFbo fbo;
     
-    float width;
-    float height;
-    
     float warpWidth;
     float warpHeight;
     float warpX;
