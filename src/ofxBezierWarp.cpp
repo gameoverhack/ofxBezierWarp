@@ -1,3 +1,4 @@
+
 /*
  * ofxBezierWarp.cpp
  *
@@ -168,7 +169,7 @@ void ofxBezierWarp::draw(float x, float y, float w, float h){
         }
     }
     
-    glFlush();
+//    glFinish();
 }
 
 //--------------------------------------------------------------
