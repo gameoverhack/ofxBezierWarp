@@ -45,8 +45,8 @@ public:
     ofxBezierWarp();
     ~ofxBezierWarp();
     
-    void allocate(int w, int h, int pixelFormat = GL_BGRA);
-    void allocate(int w, int h, int numXPoints, int numYPoints, float pixelsPerGridDivision, int pixelFormat = GL_BGRA);
+    void allocate(int w, int h, int pixelFormat = GL_RGBA);
+    void allocate(int w, int h, int numXPoints, int numYPoints, float pixelsPerGridDivision, int pixelFormat = GL_RGBA);
     
     void begin();
     void end();
@@ -70,6 +70,7 @@ public:
     int getNumXPoints();
     int getNumYPoints();
     
+    float getWarpGridResolution();
     int getGridDivisionsX();
     int getGridDivisionsY();
     
@@ -80,6 +81,11 @@ public:
     void toggleDoWarp();
     void setDoWarp(bool b);
     bool getDoWarp();
+    
+    void setOffset(ofPoint p);
+    
+    ofPoint getOffset();
+    ofPoint& getOffsetReference();
     
     ofFbo& getFBO();
     
@@ -94,6 +100,9 @@ public:
     void mouseDragged(ofMouseEventArgs & e);
     void mousePressed(ofMouseEventArgs & e);
     void mouseReleased(ofMouseEventArgs & e);
+    void mouseScrolled(ofMouseEventArgs & e);
+    void mouseEntered(ofMouseEventArgs & e);
+    void mouseExited(ofMouseEventArgs & e);
     
 protected:
 	
@@ -104,6 +113,9 @@ protected:
     bool bDoWarp;
     
     ofFbo fbo;
+    
+    ofPoint offset;
+    ofPoint sOffset;
     
     float warpWidth;
     float warpHeight;
@@ -116,6 +128,7 @@ protected:
     int numXPoints;
     int numYPoints;
     
+    float gridResolution;
     int gridDivX;
     int gridDivY;
     

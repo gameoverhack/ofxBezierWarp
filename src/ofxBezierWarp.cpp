@@ -48,6 +48,7 @@ ofxBezierWarp::ofxBezierWarp(){
     warpY = 0;
     warpWidth = 0;
     warpHeight = 0;
+    gridResolution = -1;
     bShowWarpGrid = false;
     bWarpPositionDiff = false;
     bDoWarp = true;
@@ -251,7 +252,14 @@ void ofxBezierWarp::setWarpGridPosition(float x, float y, float w, float h){
 
 //--------------------------------------------------------------
 void ofxBezierWarp::setWarpGridResolution(float pixelsPerGridDivision){
+    gridResolution = pixelsPerGridDivision;
     setWarpGridResolution(ceil(fbo.getWidth() / pixelsPerGridDivision), ceil(fbo.getHeight() / pixelsPerGridDivision));
+}
+
+//--------------------------------------------------------------
+float ofxBezierWarp::getWarpGridResolution(){
+    assert(gridResolution > 0); // tis since if set via gridDivY/X it won't be a single number...
+    return gridResolution;
 }
 
 //--------------------------------------------------------------
@@ -260,7 +268,7 @@ void ofxBezierWarp::setWarpGridResolution(int gridDivisionsX, int gridDivisionsY
     // objects (since I'm not calling it every frame as it is expensive)
     // so if you try to set different resolutions
     // for different instances it won't work as expected
-
+    
     gridDivX = gridDivisionsX;
     gridDivY = gridDivisionsY;
     glMapGrid2f(gridDivX, 0, 1, gridDivY, 0, 1);
@@ -364,6 +372,21 @@ vector<GLfloat> ofxBezierWarp::getControlPoints(){
 }
 
 //--------------------------------------------------------------
+void ofxBezierWarp::setOffset(ofPoint p){
+    offset = p;
+}
+
+//--------------------------------------------------------------
+ofPoint ofxBezierWarp::getOffset(){
+    return offset;
+}
+
+//--------------------------------------------------------------
+ofPoint& ofxBezierWarp::getOffsetReference(){
+    return offset;
+}
+
+//--------------------------------------------------------------
 vector<GLfloat>& ofxBezierWarp::getControlPointsReference(){
     return cntrlPoints;
 }
@@ -423,4 +446,19 @@ void ofxBezierWarp::mousePressed(ofMouseEventArgs & e){
 void ofxBezierWarp::mouseReleased(ofMouseEventArgs & e){
     currentCntrlX = -1;
     currentCntrlY = -1;
+}
+
+//--------------------------------------------------------------
+void ofxBezierWarp::mouseScrolled(ofMouseEventArgs & e){
+
+}
+
+//--------------------------------------------------------------
+void ofxBezierWarp::mouseEntered(ofMouseEventArgs & e){
+
+}
+
+//--------------------------------------------------------------
+void ofxBezierWarp::mouseExited(ofMouseEventArgs & e){
+
 }
