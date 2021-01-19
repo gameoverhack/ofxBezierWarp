@@ -69,9 +69,9 @@ void ofxBezierWarp::allocate(int _w, int _h, int pixelFormat){
 void ofxBezierWarp::allocate(int _w, int _h, int _numXPoints, int _numYPoints, float pixelsPerGridDivision, int pixelFormat){
 
     //disable arb textures (so we use texture 2d instead)
-
+   
     if(_w == 0 || _h == 0 || _numXPoints == 0 || _numYPoints == 0){
-        ofLogError() << "Cannot accept 0 as value for w, h numXPoints or numYPoints";
+        ofLogError("Cannot accept 0 as value for w, h numXPoints or numYPoints");
         return;
     }
 
@@ -372,17 +372,17 @@ vector<GLfloat> ofxBezierWarp::getControlPoints(){
 }
 
 //--------------------------------------------------------------
-void ofxBezierWarp::setOffset(ofPoint p){
+void ofxBezierWarp::setOffset(ofVec2f p){
     offset = p;
 }
 
 //--------------------------------------------------------------
-ofPoint ofxBezierWarp::getOffset(){
+ofVec2f ofxBezierWarp::getOffset(){
     return offset;
 }
 
 //--------------------------------------------------------------
-ofPoint& ofxBezierWarp::getOffsetReference(){
+ofVec2f& ofxBezierWarp::getOffsetReference(){
     return offset;
 }
 
