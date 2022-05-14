@@ -10,7 +10,9 @@ build/
 *.perspectivev3
 *.mode1v3
 *.mode2v3
-/example/bin/
-/example/obj/
-/example/build/
-example/*.layout
+/example-ofxBezierWarp/bin/
+/example-ofxBezierWarp/nbproject/
+/example-ofxBezierWarp/obj/
+/example-ofxBezierWarp/build/
+example-ofxBezierWarp/*.layout
+

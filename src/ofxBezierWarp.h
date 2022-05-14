@@ -97,6 +97,9 @@ public:
     vector<GLfloat> getControlPoints();
     vector<GLfloat>& getControlPointsReference();
     
+    
+    void keyPressed(ofKeyEventArgs & e);
+    void keyReleased(ofKeyEventArgs & e);
     void mouseMoved(ofMouseEventArgs & e);
     void mouseDragged(ofMouseEventArgs & e);
     void mousePressed(ofMouseEventArgs & e);
@@ -109,9 +112,13 @@ protected:
 	
     void drawWarpGrid(float x, float y, float w, float h);
     
+    void rearrangeAllPoints();
+    
     bool bShowWarpGrid;
     bool bWarpPositionDiff;
     bool bDoWarp;
+    bool bRealignPlease;
+    bool bGrabbedACorner;
     
     ofFbo fbo;
     
