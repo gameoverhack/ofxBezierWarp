@@ -35,13 +35,21 @@
 #include "ofxBezierWarp.h"
 
 GLfloat texpts [2][2][2] = {
-    { {0, 0}, {1, 0} },	{ {0, 1}, {1, 1} }
+    {
+        {0, 0},
+        {1, 0}
+    },
+    {
+        {0, 1},
+        {1, 1}
+    }
 };
 
 //--------------------------------------------------------------
-ofxBezierWarp::ofxBezierWarp(){
-    currentCntrlX = -1;
+
+ofxBezierWarp::ofxBezierWarp() {
     currentCntrlY = -1;
+    currentCntrlX = -1;
     numXPoints = 0;
     numYPoints = 0;
     warpX = 0;
@@ -55,27 +63,30 @@ ofxBezierWarp::ofxBezierWarp(){
 }
 
 //--------------------------------------------------------------
-ofxBezierWarp::~ofxBezierWarp(){
+
+ofxBezierWarp::~ofxBezierWarp() {
     //fbo.destroy();
     cntrlPoints.clear();
 }
 
 //--------------------------------------------------------------
-void ofxBezierWarp::allocate(int _w, int _h, int pixelFormat){
+
+void ofxBezierWarp::allocate(int _w, int _h, int pixelFormat) {
     allocate(_w, _h, 2, 2, 100.0f, pixelFormat);
 }
 
 //--------------------------------------------------------------
-void ofxBezierWarp::allocate(int _w, int _h, int _numXPoints, int _numYPoints, float pixelsPerGridDivision, int pixelFormat){
+
+void ofxBezierWarp::allocate(int _w, int _h, int _numXPoints, int _numYPoints, float pixelsPerGridDivision, int pixelFormat) {
 
     //disable arb textures (so we use texture 2d instead)
 
-    if(_w == 0 || _h == 0 || _numXPoints == 0 || _numYPoints == 0){
-        ofLogError() << "Cannot accept 0 as value for w, h numXPoints or numYPoints";
+    if (_w == 0 || _h == 0 || _numXPoints == 0 || _numYPoints == 0) {
+        ofLogError("Cannot accept 0 as value for w, h numXPoints or numYPoints");
         return;
     }
 
-    if(_w != fbo.getWidth() || _h != fbo.getHeight()){
+    if (_w != fbo.getWidth() || _h != fbo.getHeight()) {
 
         fbo.allocate(_w, _h, pixelFormat);
         ofLogVerbose() << "Allocating bezier fbo texture as: " << fbo.getWidth() << " x " << fbo.getHeight();
@@ -90,13 +101,14 @@ void ofxBezierWarp::allocate(int _w, int _h, int _numXPoints, int _numYPoints, f
     glEnable(GL_AUTO_NORMAL);
 
     setWarpGridResolution(pixelsPerGridDivision);
-    
+
     //glShadeModel(GL_FLAT);
 
 }
 
 //--------------------------------------------------------------
-void ofxBezierWarp::begin(){
+
+void ofxBezierWarp::begin() {
     fbo.begin();
     ofPushMatrix();
     glClearColor(0.0, 0.0, 0.0, 1.0);
@@ -104,102 +116,111 @@ void ofxBezierWarp::begin(){
 }
 
 //--------------------------------------------------------------
-void ofxBezierWarp::end(){
+
+void ofxBezierWarp::end() {
     ofPopMatrix();
     fbo.end();
 }
 
 //--------------------------------------------------------------
-void ofxBezierWarp::draw(){
+
+void ofxBezierWarp::draw() {
     draw(0, 0, fbo.getWidth(), fbo.getHeight());
 }
 
 //--------------------------------------------------------------
-void ofxBezierWarp::draw(float x, float y){
+
+void ofxBezierWarp::draw(float x, float y) {
     draw(x, y, fbo.getWidth(), fbo.getHeight());
 }
 
 //--------------------------------------------------------------
-void ofxBezierWarp::draw(float x, float y, float w, float h){
 
-    if(!fbo.isAllocated()) return;
+void ofxBezierWarp::draw(float x, float y, float w, float h) {
+
+    if (!fbo.isAllocated()) return;
 
     ofPushMatrix();
 
-    if(bDoWarp){
-        
+    if (bDoWarp) {
+
         ofTranslate(x, y);
-        ofScale(w/fbo.getWidth(), h/fbo.getHeight());
-        
+        ofScale(w / fbo.getWidth(), h / fbo.getHeight());
+
         ofTexture & fboTex = fbo.getTextureReference();
-        
+
         // upload the bezier control points to the map surface
         // this can be done just once (or when control points change)
         // if there is only one bezier surface - but with multiple
         // it needs to be done every frame
         glMap2f(GL_MAP2_VERTEX_3, 0, 1, 3, numXPoints, 0, 1, numXPoints * 3, numYPoints, &(cntrlPoints[0]));
-        
+
         fboTex.bind();
-        
+
         glMatrixMode(GL_TEXTURE);
         glPushMatrix();
         glLoadIdentity();
-        
+
         glScalef(fboTex.getWidth(), fboTex.getHeight(), 1.0f);
         glMatrixMode(GL_MODELVIEW);
-        
-//      glEnable(GL_MAP2_VERTEX_3);
-//      glEnable(GL_AUTO_NORMAL);
+
+        //      glEnable(GL_MAP2_VERTEX_3);
+        //      glEnable(GL_AUTO_NORMAL);
         glEvalMesh2(GL_FILL, 0, gridDivX, 0, gridDivY);
-//      glDisable(GL_MAP2_VERTEX_3);
-//      glDisable(GL_AUTO_NORMAL);
-        
+        //      glDisable(GL_MAP2_VERTEX_3);
+        //      glDisable(GL_AUTO_NORMAL);
+
         fboTex.unbind();
-        
+
         glMatrixMode(GL_TEXTURE);
         glPopMatrix();
         glMatrixMode(GL_MODELVIEW);
-        
-    }else{
-        
+
+    } else {
+
         fbo.draw(x, y, w, h);
-        
+
     }
 
     ofPopMatrix();
 
-    if(bShowWarpGrid){
-        if(bWarpPositionDiff){
+    if (bShowWarpGrid) {
+        if (bWarpPositionDiff) {
             drawWarpGrid(warpX, warpY, warpWidth, warpHeight);
-        }else{
+        } else {
             setWarpGridPosition(x, y, w, h);
         }
     }
-    
-//    glFinish();
+
+    //    glFinish();
 }
 
 //--------------------------------------------------------------
-void ofxBezierWarp::drawWarpGrid(float x, float y, float w, float h){
+
+void ofxBezierWarp::drawWarpGrid(float x, float y, float w, float h) {
 
     ofPushStyle();
     ofPushMatrix();
 
     ofSetColor(255, 255, 255);
     ofTranslate(x, y);
-    ofScale(w/fbo.getWidth(), h/fbo.getHeight());
+    ofScale(w / fbo.getWidth(), h / fbo.getHeight());
 
-//    glEnable(GL_MAP2_VERTEX_3);
-//    glEnable(GL_AUTO_NORMAL);
+    //    glEnable(GL_MAP2_VERTEX_3);
+    //    glEnable(GL_AUTO_NORMAL);
     glEvalMesh2(GL_LINE, 0, gridDivX, 0, gridDivY);
-//    glDisable(GL_MAP2_VERTEX_3);
-//    glDisable(GL_AUTO_NORMAL);
-    
-    for(int i = 0; i < numYPoints; i++){
-        for(int j = 0; j < numXPoints; j++){
+    //    glDisable(GL_MAP2_VERTEX_3);
+    //    glDisable(GL_AUTO_NORMAL);
+
+    for (int i = 0; i < numYPoints; i++) {
+        for (int j = 0; j < numXPoints; j++) {
             ofFill();
-            ofSetColor(255, 0, 0);
-            ofCircle(cntrlPoints[(i*numXPoints+j)*3+0], cntrlPoints[(i*numXPoints+j)*3+1], 5);
+            if (bRealignPlease) {
+                ofSetColor(255, 0, 0);
+            } else {
+                ofSetColor(100, 255, 100);
+            }
+            ofCircle(cntrlPoints[(i * numXPoints + j)*3 + 0], cntrlPoints[(i * numXPoints + j)*3 + 1], 5);
             ofNoFill();
         }
     }
@@ -209,30 +230,31 @@ void ofxBezierWarp::drawWarpGrid(float x, float y, float w, float h){
 }
 
 //--------------------------------------------------------------
-void ofxBezierWarp::setWarpGrid(int _numXPoints, int _numYPoints, bool forceReset){
 
-    if(_numXPoints != numXPoints || _numYPoints != numYPoints) forceReset = true;
+void ofxBezierWarp::setWarpGrid(int _numXPoints, int _numYPoints, bool forceReset) {
 
-    if(_numXPoints < 2 || _numYPoints < 2){
+    if (_numXPoints != numXPoints || _numYPoints != numYPoints) forceReset = true;
+
+    if (_numXPoints < 2 || _numYPoints < 2) {
         ofLogError() << "Can't have less than 2 X or Y grid points";
         return;
     }
 
-    if(forceReset){
+    if (forceReset) {
 
         numXPoints = _numXPoints;
         numYPoints = _numYPoints;
 
         // calculate an even distribution of X and Y control points across fbo width and height
         cntrlPoints.resize(numXPoints * numYPoints * 3);
-        for(int i = 0; i < numYPoints; i++){
+        for (int i = 0; i < numYPoints; i++) {
             GLfloat x, y;
             y = (fbo.getHeight() / (numYPoints - 1)) * i;
-            for(int j = 0; j < numXPoints; j++){
+            for (int j = 0; j < numXPoints; j++) {
                 x = (fbo.getWidth() / (numXPoints - 1)) * j;
-                cntrlPoints[(i*numXPoints+j)*3+0] = x;
-                cntrlPoints[(i*numXPoints+j)*3+1] = y;
-                cntrlPoints[(i*numXPoints+j)*3+2] = 0;
+                cntrlPoints[(i * numXPoints + j)*3 + 0] = x;
+                cntrlPoints[(i * numXPoints + j)*3 + 1] = y;
+                cntrlPoints[(i * numXPoints + j)*3 + 2] = 0;
                 //cout << x << ", " << y << ", " << "0" << endl;
             }
         }
@@ -242,7 +264,8 @@ void ofxBezierWarp::setWarpGrid(int _numXPoints, int _numYPoints, bool forceRese
 }
 
 //--------------------------------------------------------------
-void ofxBezierWarp::setWarpGridPosition(float x, float y, float w, float h){
+
+void ofxBezierWarp::setWarpGridPosition(float x, float y, float w, float h) {
     warpX = x;
     warpY = y;
     warpWidth = w;
@@ -251,214 +274,361 @@ void ofxBezierWarp::setWarpGridPosition(float x, float y, float w, float h){
 }
 
 //--------------------------------------------------------------
-void ofxBezierWarp::setWarpGridResolution(float pixelsPerGridDivision){
+
+void ofxBezierWarp::setWarpGridResolution(float pixelsPerGridDivision) {
     gridResolution = pixelsPerGridDivision;
     setWarpGridResolution(ceil(fbo.getWidth() / pixelsPerGridDivision), ceil(fbo.getHeight() / pixelsPerGridDivision));
 }
 
 //--------------------------------------------------------------
-float ofxBezierWarp::getWarpGridResolution(){
+
+float ofxBezierWarp::getWarpGridResolution() {
     assert(gridResolution > 0); // tis since if set via gridDivY/X it won't be a single number...
     return gridResolution;
 }
 
 //--------------------------------------------------------------
-void ofxBezierWarp::setWarpGridResolution(int gridDivisionsX, int gridDivisionsY){
+
+void ofxBezierWarp::setWarpGridResolution(int gridDivisionsX, int gridDivisionsY) {
     // NB: at the moment this sets the resolution for all mapGrid
     // objects (since I'm not calling it every frame as it is expensive)
     // so if you try to set different resolutions
     // for different instances it won't work as expected
-    
+
     gridDivX = gridDivisionsX;
     gridDivY = gridDivisionsY;
     glMapGrid2f(gridDivX, 0, 1, gridDivY, 0, 1);
 }
 
 //--------------------------------------------------------------
-void ofxBezierWarp::resetWarpGrid(){
+
+void ofxBezierWarp::resetWarpGrid() {
     setWarpGrid(numXPoints, numYPoints, true);
 }
 
 //--------------------------------------------------------------
-void ofxBezierWarp::resetWarpGridPosition(){
+
+void ofxBezierWarp::resetWarpGridPosition() {
     bWarpPositionDiff = false;
 }
 
 //--------------------------------------------------------------
-float ofxBezierWarp::getWidth(){
+
+float ofxBezierWarp::getWidth() {
     return fbo.getWidth();
 }
 
 //--------------------------------------------------------------
-float ofxBezierWarp::getHeight(){
+
+float ofxBezierWarp::getHeight() {
     return fbo.getHeight();
 }
 
 //--------------------------------------------------------------
-int ofxBezierWarp::getNumXPoints(){
+
+int ofxBezierWarp::getNumXPoints() {
     return numXPoints;
 }
 
 //--------------------------------------------------------------
-int ofxBezierWarp::getNumYPoints(){
+
+int ofxBezierWarp::getNumYPoints() {
     return numYPoints;
 }
 
 //--------------------------------------------------------------
-int ofxBezierWarp::getGridDivisionsX(){
+
+int ofxBezierWarp::getGridDivisionsX() {
     return gridDivX;
 }
 
 //--------------------------------------------------------------
-int ofxBezierWarp::getGridDivisionsY(){
+
+int ofxBezierWarp::getGridDivisionsY() {
     return gridDivY;
 }
 
 //--------------------------------------------------------------
-void ofxBezierWarp::toggleShowWarpGrid(){
+
+void ofxBezierWarp::toggleShowWarpGrid() {
     setShowWarpGrid(!getShowWarpGrid());
 }
 
 //--------------------------------------------------------------
-void ofxBezierWarp::setShowWarpGrid(bool b){
+
+void ofxBezierWarp::setShowWarpGrid(bool b) {
     bShowWarpGrid = b;
-    if(bShowWarpGrid){
+    if (bShowWarpGrid) {
         ofRegisterMouseEvents(this);
-    }else{
+        ofRegisterKeyEvents(this);
+    } else {
         ofUnregisterMouseEvents(this);
+        ofUnregisterKeyEvents(this);
     }
 }
 
 //--------------------------------------------------------------
-bool ofxBezierWarp::getShowWarpGrid(){
+
+bool ofxBezierWarp::getShowWarpGrid() {
     return bShowWarpGrid;
 }
 
 //--------------------------------------------------------------
-void ofxBezierWarp::setDoWarp(bool b){
+
+void ofxBezierWarp::setDoWarp(bool b) {
     bDoWarp = b;
 }
 
 //--------------------------------------------------------------
-bool ofxBezierWarp::getDoWarp(){
+
+bool ofxBezierWarp::getDoWarp() {
     return bDoWarp;
 }
 
 //--------------------------------------------------------------
-void ofxBezierWarp::toggleDoWarp(){
+
+void ofxBezierWarp::toggleDoWarp() {
     bDoWarp = !bDoWarp;
 }
 
 //--------------------------------------------------------------
-ofFbo& ofxBezierWarp::getFBO(){
+
+ofFbo& ofxBezierWarp::getFBO() {
     return fbo;
 }
 
 //--------------------------------------------------------------
-ofTexture& ofxBezierWarp::getTextureReference(){
+
+ofTexture& ofxBezierWarp::getTextureReference() {
     return fbo.getTextureReference();
 }
 
 //--------------------------------------------------------------
-void ofxBezierWarp::setControlPoints(vector<GLfloat> _cntrlPoints){
+
+void ofxBezierWarp::setControlPoints(vector<GLfloat> _cntrlPoints) {
     cntrlPoints.clear();
     cntrlPoints = _cntrlPoints;
     glMap2f(GL_MAP2_VERTEX_3, 0, 1, 3, numXPoints, 0, 1, numXPoints * 3, numYPoints, &(cntrlPoints[0]));
 }
 
 //--------------------------------------------------------------
-vector<GLfloat> ofxBezierWarp::getControlPoints(){
+
+vector<GLfloat> ofxBezierWarp::getControlPoints() {
     return cntrlPoints;
 }
 
 //--------------------------------------------------------------
-void ofxBezierWarp::setOffset(ofPoint p){
+
+void ofxBezierWarp::setOffset(ofVec2f p) {
     offset = p;
 }
 
 //--------------------------------------------------------------
-ofPoint ofxBezierWarp::getOffset(){
+
+ofVec2f ofxBezierWarp::getOffset() {
     return offset;
 }
 
 //--------------------------------------------------------------
-ofPoint& ofxBezierWarp::getOffsetReference(){
+
+ofVec2f& ofxBezierWarp::getOffsetReference() {
     return offset;
 }
 
 //--------------------------------------------------------------
-vector<GLfloat>& ofxBezierWarp::getControlPointsReference(){
+
+vector<GLfloat>& ofxBezierWarp::getControlPointsReference() {
     return cntrlPoints;
 }
 
 //--------------------------------------------------------------
-void ofxBezierWarp::mouseMoved(ofMouseEventArgs & e){
+
+void ofxBezierWarp::keyPressed(ofKeyEventArgs & e) {
+    if (e.key == OF_KEY_SHIFT && bGrabbedACorner) {
+        bRealignPlease = true;
+    }
+}
+
+//--------------------------------------------------------------
+
+void ofxBezierWarp::keyReleased(ofKeyEventArgs & e) {
+    bRealignPlease = false;
+}
+
+
+//--------------------------------------------------------------
+
+void ofxBezierWarp::mouseMoved(ofMouseEventArgs & e) {
 
 }
 
 //--------------------------------------------------------------
-void ofxBezierWarp::mouseDragged(ofMouseEventArgs & e){
 
-    if(!bShowWarpGrid) mouseReleased(e);
+void ofxBezierWarp::mouseDragged(ofMouseEventArgs & e) {
+
+    if (!bShowWarpGrid) mouseReleased(e);
 
     float x = e.x;
     float y = e.y;
 
-    if(bWarpPositionDiff){
-        x = (e.x - warpX) * fbo.getWidth()/warpWidth;
-        y = (e.y - warpY) * fbo.getHeight()/warpHeight;
+    if (bWarpPositionDiff) {
+        x = (e.x - warpX) * fbo.getWidth() / warpWidth;
+        y = (e.y - warpY) * fbo.getHeight() / warpHeight;
     }
 
-    if(currentCntrlX != -1 && currentCntrlY != -1){
-        cntrlPoints[(currentCntrlX*numXPoints+currentCntrlY)*3+0] = x;
-        cntrlPoints[(currentCntrlX*numXPoints+currentCntrlY)*3+1] = y;
+    if (currentCntrlY != -1 && currentCntrlX != -1) {
+        cntrlPoints[(currentCntrlY * numXPoints + currentCntrlX)*3 + 0] = x;
+        cntrlPoints[(currentCntrlY * numXPoints + currentCntrlX)*3 + 1] = y;
         glMap2f(GL_MAP2_VERTEX_3, 0, 1, 3, numXPoints, 0, 1, numXPoints * 3, numYPoints, &(cntrlPoints[0]));
     }
+
 }
 
 //--------------------------------------------------------------
-void ofxBezierWarp::mousePressed(ofMouseEventArgs & e){
 
-    if(!bShowWarpGrid) mouseReleased(e);
+void ofxBezierWarp::mousePressed(ofMouseEventArgs & e) {
+
+    if (!bShowWarpGrid) mouseReleased(e);
 
     float x = e.x;
     float y = e.y;
 
-    if(bWarpPositionDiff){
-        x = (e.x - warpX) * fbo.getWidth()/warpWidth;
-        y = (e.y - warpY) * fbo.getHeight()/warpHeight;
+    if (bWarpPositionDiff) {
+        x = (e.x - warpX) * fbo.getWidth() / warpWidth;
+        y = (e.y - warpY) * fbo.getHeight() / warpHeight;
     }
 
     float dist = 10.0f;
 
-    for(int i = 0; i < numYPoints; i++){
-        for(int j = 0; j < numXPoints; j++){
-            if(x - cntrlPoints[(i*numXPoints+j)*3+0] >= -dist && x - cntrlPoints[(i*numXPoints+j)*3+0] <= dist &&
-               y - cntrlPoints[(i*numXPoints+j)*3+1] >= -dist && y - cntrlPoints[(i*numXPoints+j)*3+1] <= dist){
-                currentCntrlX = i;
-                currentCntrlY = j;
+    for (int i = 0; i < numYPoints; i++) {
+        for (int j = 0; j < numXPoints; j++) {
+            if (x - cntrlPoints[(i * numXPoints + j)*3 + 0] >= -dist && x - cntrlPoints[(i * numXPoints + j)*3 + 0] <= dist &&
+                    y - cntrlPoints[(i * numXPoints + j)*3 + 1] >= -dist && y - cntrlPoints[(i * numXPoints + j)*3 + 1] <= dist) {
+                currentCntrlY = i;
+                currentCntrlX = j;
             }
         }
+    }
+    // check if a corner-Point is touched
+    if (
+            (currentCntrlY == 0 && currentCntrlX == 0) ||
+            (currentCntrlY == 0 && currentCntrlX == numXPoints - 1) ||
+            (currentCntrlY == numYPoints - 1 && currentCntrlX == 0) ||
+            (currentCntrlY == numYPoints - 1 && currentCntrlX == numXPoints - 1)
+            ) {
+        bGrabbedACorner = true;
+    } else {
+        bGrabbedACorner = false;
     }
 }
 
 //--------------------------------------------------------------
-void ofxBezierWarp::mouseReleased(ofMouseEventArgs & e){
-    currentCntrlX = -1;
+
+void ofxBezierWarp::mouseReleased(ofMouseEventArgs & e) {
+    if (bRealignPlease) {
+        rearrangeAllPoints();
+    }
     currentCntrlY = -1;
+    currentCntrlX = -1;
+    bGrabbedACorner = false;
+}
+
+
+
+//--------------------------------------------------------------
+
+void ofxBezierWarp::rearrangeAllPoints() {
+    ofLogNotice("rearrange all points!");
+    // outer lines vertical
+    //    ofVec2f topPoint = ofVec2f(cntrlPoints[0], );
+    //    ofVec2f lowestPoint  = ofVec2f(cntrlPoints[0], );
+
+    //    
+    //    cntrlPoints[(currentCntrlY*numXPoints+currentCntrlX)*3+0] = x;
+    //    cntrlPoints[(currentCntrlY*numXPoints+currentCntrlX)*3+1] = y;
+
+    //                cntrlPoints[(i*numXPoints+j)*3+0] = x;
+    //                cntrlPoints[(i*numXPoints+j)*3+1] = y;
+    //            
+    // i = yPoints, j = xPoints           
+
+    // left upper corner
+    int luNumber = (0 * numXPoints + 0);
+    //ofLog() << luNumber;
+    int luX = cntrlPoints[luNumber * 3 + 0];
+    int luY = cntrlPoints[luNumber * 3 + 1];
+
+    // right upper corner    
+    int ruNumber = (numXPoints * 0 + (numXPoints - 1));
+    //ofLog() << ruNumber;
+    int ruX = cntrlPoints[ruNumber * 3 + 0];
+    int ruY = cntrlPoints[ruNumber * 3 + 1];
+
+    // left lower corner    
+    int llNumber = ((numYPoints - 1) * numXPoints + 0);
+    //ofLog() << llNumber;
+    int llX = cntrlPoints[llNumber * 3 + 0];
+    int llY = cntrlPoints[llNumber * 3 + 1];
+
+    // right lower corner    
+    int rlNumber = ((numYPoints - 1) * numXPoints + (numXPoints - 1));
+    //ofLog() << rlNumber;
+    int rlX = cntrlPoints[rlNumber * 3 + 0];
+    int rlY = cntrlPoints[rlNumber * 3 + 1];
+
+    int teilLeftX = (luX - llX) / (numYPoints-1);
+    int teilRightX = (ruX - rlX) / (numYPoints-1);
+    int teilLeftY = (luY - llY) / (numYPoints-1);
+    int teilRightY = (ruY - rlY) / (numYPoints-1);
+
+    // rearranging the vertical lines left and right
+    for (int i = 0; i < numYPoints - 1; i++) {
+        cntrlPoints[(i * numXPoints + 0)*3 + 0] = luX - (i * teilLeftX);
+        cntrlPoints[(i * numXPoints + 0)*3 + 1] = luY - (i * teilLeftY);
+//        ofLog() << (i * numXPoints + 0)*3 + 0 << ": " << luX - (i * teilLeftX);
+//        ofLog() << (i * numXPoints + 0)*3 + 1 << ": " << luY - (i * teilLeftY) << " | " << llY;
+        cntrlPoints[(i * numXPoints + numXPoints - 1)*3 + 0] = ruX - (i * teilRightX);
+        cntrlPoints[(i * numXPoints + numXPoints - 1)*3 + 1] = ruY - (i * teilRightY);
+    }
+    
+    // rearranging the horizontal lines
+    // (we are not efficient here, yes - but we do not actually need to be 
+    // at this point, so we prefer easier to understand code...)
+    for (int i = 0; i < numYPoints; i++) {
+        // in this row we do:
+        // left point
+        int lpX = cntrlPoints[(i * numXPoints + 0)*3 + 0];
+        int lpY = cntrlPoints[(i * numXPoints + 0)*3 + 1];
+        // right point
+        int rpX = cntrlPoints[((i * numXPoints) + numXPoints-1)*3 + 0];
+        int rpY = cntrlPoints[((i * numXPoints) + numXPoints-1)*3 + 1];
+        // calculate parts to add
+        int teilX = (lpX - rpX) / (numXPoints-1);
+        int teilY = (lpY - rpY) / (numXPoints-1);
+        // rearranging the app. horizontal line
+        for (int j = 0; j < numXPoints-1; j++) {
+            cntrlPoints[(i * numXPoints + j)*3 + 0] = lpX - (j * teilX);
+            cntrlPoints[(i * numXPoints + j)*3 + 1] = lpY - (j * teilY);
+       }        
+    }
+
+}
+
+
+//--------------------------------------------------------------
+
+void ofxBezierWarp::mouseScrolled(ofMouseEventArgs & e) {
+
 }
 
 //--------------------------------------------------------------
-void ofxBezierWarp::mouseScrolled(ofMouseEventArgs & e){
+
+void ofxBezierWarp::mouseEntered(ofMouseEventArgs & e) {
 
 }
 
 //--------------------------------------------------------------
-void ofxBezierWarp::mouseEntered(ofMouseEventArgs & e){
 
-}
-
-//--------------------------------------------------------------
-void ofxBezierWarp::mouseExited(ofMouseEventArgs & e){
+void ofxBezierWarp::mouseExited(ofMouseEventArgs & e) {
 
 }

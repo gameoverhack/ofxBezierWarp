@@ -34,6 +34,7 @@
 #ifndef _H_OFXBEZIERWARP
 #define _H_OFXBEZIERWARP
 
+#include "ofMain.h"
 #include "ofFbo.h"
 #include "ofGraphics.h"
 #include "ofEvents.h"
@@ -82,10 +83,10 @@ public:
     void setDoWarp(bool b);
     bool getDoWarp();
     
-    void setOffset(ofPoint p);
+    void setOffset(ofVec2f p);
     
-    ofPoint getOffset();
-    ofPoint& getOffsetReference();
+    ofVec2f getOffset();
+    ofVec2f& getOffsetReference();
     
     ofFbo& getFBO();
     
@@ -96,6 +97,9 @@ public:
     vector<GLfloat> getControlPoints();
     vector<GLfloat>& getControlPointsReference();
     
+    
+    void keyPressed(ofKeyEventArgs & e);
+    void keyReleased(ofKeyEventArgs & e);
     void mouseMoved(ofMouseEventArgs & e);
     void mouseDragged(ofMouseEventArgs & e);
     void mousePressed(ofMouseEventArgs & e);
@@ -108,14 +112,18 @@ protected:
 	
     void drawWarpGrid(float x, float y, float w, float h);
     
+    void rearrangeAllPoints();
+    
     bool bShowWarpGrid;
     bool bWarpPositionDiff;
     bool bDoWarp;
+    bool bRealignPlease;
+    bool bGrabbedACorner;
     
     ofFbo fbo;
     
-    ofPoint offset;
-    ofPoint sOffset;
+    ofVec2f offset;
+    ofVec2f sOffset;
     
     float warpWidth;
     float warpHeight;

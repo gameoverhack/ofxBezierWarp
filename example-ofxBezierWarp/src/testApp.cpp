@@ -2,11 +2,11 @@
 
 //--------------------------------------------------------------
 void testApp::setup(){
-    
+    ofSetFrameRate(60);
     bUseWarp = true;
     
     // load a movie for testing purposes
-    vid.loadMovie("pathtoyourmovie.mov");
+    vid.loadMovie("val_h.mp4");
     vid.play();
     
     // allocate the warp with width, height, numXControlPoints,  
