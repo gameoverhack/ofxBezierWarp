@@ -104,6 +104,7 @@ void ofxBezierWarp::allocate(int _w, int _h, int _numXPoints, int _numYPoints, f
 
     //glShadeModel(GL_FLAT);
 
+
 }
 
 //--------------------------------------------------------------
@@ -208,6 +209,11 @@ void ofxBezierWarp::drawWarpGrid(float x, float y, float w, float h) {
 
     //    glEnable(GL_MAP2_VERTEX_3);
     //    glEnable(GL_AUTO_NORMAL);
+    if ( showStarTL || showStarTR || showStarBL || showStarBR ) {
+        ofSetColor(150);
+    } else {
+        ofSetColor(255);
+    }
     glEvalMesh2(GL_LINE, 0, gridDivX, 0, gridDivY);
     //    glDisable(GL_MAP2_VERTEX_3);
     //    glDisable(GL_AUTO_NORMAL);
@@ -224,7 +230,42 @@ void ofxBezierWarp::drawWarpGrid(float x, float y, float w, float h) {
             ofNoFill();
         }
     }
+    ofSetColor(255);
 
+    // check if a corner-Point is touched
+    if (showStarTL) {
+        int x = cntrlPoints[(0 + 0)*3 + 0];
+        int y = cntrlPoints[(0 + 0)*3 + 1];
+        ofDrawLine(x-350, y, x+350, y);
+        ofDrawLine(x, y-350, x, y+350);
+        ofDrawLine(x-150, y-150, x+150, y+150);
+        ofDrawLine(x+150, y-150, x-150, y+150);
+    }
+    if (showStarTR) {
+        int x = cntrlPoints[(0 + numYPoints)*3 + 0];
+        int y = cntrlPoints[(0 + numYPoints)*3 + 1];
+        ofDrawLine(x-350, y, x+350, y);
+        ofDrawLine(x, y-350, x, y+350);
+        ofDrawLine(x-150, y-150, x+150, y+150);
+        ofDrawLine(x+150, y-150, x-150, y+150);
+    }
+    if (showStarBR) {
+        int x = cntrlPoints[(numXPoints*numYPoints -1)*3 + 0];
+        int y = cntrlPoints[(numXPoints*numYPoints -1)*3 + 1];
+        ofDrawLine(x-350, y, x+350, y);
+        ofDrawLine(x, y-350, x, y+350);
+        ofDrawLine(x-150, y-150, x+150, y+150);
+        ofDrawLine(x+150, y-150, x-150, y+150);
+    }
+    if (showStarBL) {
+        int x = cntrlPoints[(numXPoints*(numYPoints-1))*3 + 0];
+        int y = cntrlPoints[(numXPoints*(numYPoints-1))*3 + 1];
+        ofDrawLine(x-350, y, x+350, y);
+        ofDrawLine(x, y-350, x, y+350);
+        ofDrawLine(x-150, y-150, x+150, y+150);
+        ofDrawLine(x+150, y-150, x-150, y+150);
+    }
+    
     ofPopMatrix();
     ofPopStyle();
 }
@@ -459,6 +500,56 @@ void ofxBezierWarp::keyReleased(ofKeyEventArgs & e) {
 //--------------------------------------------------------------
 
 void ofxBezierWarp::mouseMoved(ofMouseEventArgs & e) {
+
+    float x = e.x;
+    float y = e.y;
+
+    if (bWarpPositionDiff) {
+        x = (e.x - warpX) * fbo.getWidth() / warpWidth;
+        y = (e.y - warpY) * fbo.getHeight() / warpHeight;
+    }
+
+    float dist = 10.0f;
+
+        for (int i = 0; i < numYPoints; i++) {
+        for (int j = 0; j < numXPoints; j++) {
+            if (x - cntrlPoints[(i * numXPoints + j)*3 + 0] >= -dist && x - cntrlPoints[(i * numXPoints + j)*3 + 0] <= dist &&
+                    y - cntrlPoints[(i * numXPoints + j)*3 + 1] >= -dist && y - cntrlPoints[(i * numXPoints + j)*3 + 1] <= dist) {
+                currentCntrlY_2 = i;
+                currentCntrlX_2 = j;
+            }
+        }
+    }
+
+    // check if a corner-Point is touched
+    if (
+            (currentCntrlY_2 == 0 && currentCntrlX_2 == 0)
+            ) {
+        showStarTL = true;
+    } else {
+        showStarTL = false;
+    }
+    if (
+            (currentCntrlY_2 == 0 && currentCntrlX_2 == numXPoints - 1)
+            ) {
+        showStarTR = true;
+    } else {
+        showStarTR = false;
+    }
+    if (
+            (currentCntrlY_2 == numYPoints - 1 && currentCntrlX_2 == 0)
+            ) {
+        showStarBL = true;
+    } else {
+        showStarBL = false;
+    }
+        if (
+            (currentCntrlY_2 == numYPoints - 1 && currentCntrlX_2 == numXPoints - 1)
+            ) {
+        showStarBR = true;
+    } else {
+        showStarBR = false;
+    }
 
 }
 

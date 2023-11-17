@@ -119,6 +119,10 @@ protected:
     bool bDoWarp;
     bool bRealignPlease;
     bool bGrabbedACorner;
+    bool showStarTL;
+    bool showStarTR;
+    bool showStarBL;
+    bool showStarBR;
     
     ofFbo fbo;
     
@@ -130,8 +134,8 @@ protected:
     float warpX;
     float warpY;
     
-    int currentCntrlX;
-    int currentCntrlY;
+    int currentCntrlX, currentCntrlX_2;
+    int currentCntrlY, currentCntrlY_2;
     
     int numXPoints;
     int numYPoints;
