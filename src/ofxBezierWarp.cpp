@@ -399,6 +399,7 @@ void ofxBezierWarp::toggleShowWarpGrid() {
 
 void ofxBezierWarp::setShowWarpGrid(bool b) {
     bShowWarpGrid = b;
+	bRealignPlease = false;
     if (bShowWarpGrid) {
         ofRegisterMouseEvents(this);
         ofRegisterKeyEvents(this);
