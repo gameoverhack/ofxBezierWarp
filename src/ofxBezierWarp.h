@@ -34,6 +34,20 @@
 #ifndef _H_OFXBEZIERWARP
 #define _H_OFXBEZIERWARP
 
+enum ofOeDirection : const unsigned int {
+    OE_DIRECTION_UP = 0,
+    OE_DIRECTION_DOWN = 1,
+    OE_DIRECTION_LEFT = 2,
+    OE_DIRECTION_RIGHT = 3
+};
+enum ofOeCorner : const unsigned int {
+    OE_UPPER_LEFT = 1,
+    OE_UPPER_RIGHT = 2,
+    OE_LOWER_LEFT = 3,
+    OE_LOWER_RIGHT = 4,
+    OE_NONE = 0
+};
+
 #include "ofMain.h"
 #include "ofFbo.h"
 #include "ofGraphics.h"
@@ -65,6 +79,9 @@ public:
     void resetWarpGrid();
     void resetWarpGridPosition();
     
+    void moveCorner(ofOeCorner corner, ofOeDirection direction);
+
+
     float getWidth();
     float getHeight();
     
@@ -107,12 +124,12 @@ public:
     void mouseScrolled(ofMouseEventArgs & e);
     void mouseEntered(ofMouseEventArgs & e);
     void mouseExited(ofMouseEventArgs & e);
-    
+    void rearrangeAllPoints();
+
 protected:
 	
     void drawWarpGrid(float x, float y, float w, float h);
     
-    void rearrangeAllPoints();
     
     bool bShowWarpGrid;
     bool bWarpPositionDiff;

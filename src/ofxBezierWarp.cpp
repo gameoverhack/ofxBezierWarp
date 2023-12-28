@@ -724,3 +724,43 @@ void ofxBezierWarp::mouseEntered(ofMouseEventArgs & e) {
 void ofxBezierWarp::mouseExited(ofMouseEventArgs & e) {
 
 }
+
+
+//--------------------------------------------------------------
+
+void ofxBezierWarp::moveCorner(ofOeCorner corner, ofOeDirection direction) {
+    int oePoint;
+    // getting control points
+    switch (corner) {
+    case OE_UPPER_LEFT:
+        oePoint = (0 * numXPoints + 0);
+        break;
+    case OE_UPPER_RIGHT:
+        oePoint = (numXPoints * 0 + (numXPoints - 1));
+        break;
+    case OE_LOWER_LEFT:
+        oePoint = ((numYPoints - 1) * numXPoints + 0);
+        break;
+    case OE_LOWER_RIGHT:
+        oePoint = ((numYPoints - 1) * numXPoints + (numXPoints - 1));
+        break;
+    }
+
+    switch (direction) {
+    case OE_DIRECTION_UP:
+        cntrlPoints[oePoint * 3 + 1]--;
+        break;
+    case OE_DIRECTION_DOWN:
+        cntrlPoints[oePoint * 3 + 1]++;
+        break;
+    case OE_DIRECTION_LEFT:
+        cntrlPoints[oePoint * 3 + 0]--;
+        break;
+    case OE_DIRECTION_RIGHT:
+        cntrlPoints[oePoint * 3 + 0]++;
+        break;
+
+    }
+
+}
+
