@@ -113,7 +113,7 @@ public:
     
     vector<GLfloat> getControlPoints();
     vector<GLfloat>& getControlPointsReference();
-    
+
     
     void keyPressed(ofKeyEventArgs & e);
     void keyReleased(ofKeyEventArgs & e);
@@ -125,7 +125,7 @@ public:
     void mouseEntered(ofMouseEventArgs & e);
     void mouseExited(ofMouseEventArgs & e);
     void rearrangeAllPoints();
-
+    bool showHelperOnCorner[4];
 protected:
 	
     void drawWarpGrid(float x, float y, float w, float h);
@@ -136,11 +136,8 @@ protected:
     bool bDoWarp;
     bool bRealignPlease;
     bool bGrabbedACorner;
-    bool showStarTL;
-    bool showStarTR;
-    bool showStarBL;
-    bool showStarBR;
-    
+    bool showHelperOnCornerMouse[4];
+
     ofFbo fbo;
     
     ofVec2f offset;

@@ -60,6 +60,8 @@ ofxBezierWarp::ofxBezierWarp() {
     bShowWarpGrid = false;
     bWarpPositionDiff = false;
     bDoWarp = true;
+
+
 }
 
 //--------------------------------------------------------------
@@ -78,6 +80,10 @@ void ofxBezierWarp::allocate(int _w, int _h, int pixelFormat) {
 //--------------------------------------------------------------
 
 void ofxBezierWarp::allocate(int _w, int _h, int _numXPoints, int _numYPoints, float pixelsPerGridDivision, int pixelFormat) {
+    
+    for (int i = 0; i < 4; i++) {
+        showHelperOnCorner[i] = false;
+    }
 
     //disable arb textures (so we use texture 2d instead)
 
@@ -209,7 +215,18 @@ void ofxBezierWarp::drawWarpGrid(float x, float y, float w, float h) {
 
     //    glEnable(GL_MAP2_VERTEX_3);
     //    glEnable(GL_AUTO_NORMAL);
-    if ( showStarTL || showStarTR || showStarBL || showStarBR ) {
+    if (
+            any_of(
+                std::begin(showHelperOnCorner),
+                std::end(showHelperOnCorner),
+                [](bool ii) { return ii; }
+            ) ||
+            any_of(
+                std::begin(showHelperOnCornerMouse),
+                std::end(showHelperOnCornerMouse),
+                [](bool iii) { return iii; }
+            )
+        ) {
         ofSetColor(150);
     } else {
         ofSetColor(255);
@@ -233,7 +250,7 @@ void ofxBezierWarp::drawWarpGrid(float x, float y, float w, float h) {
     ofSetColor(255);
 
     // check if a corner-Point is touched
-    if (showStarTL) {
+    if (showHelperOnCorner[0] || showHelperOnCornerMouse[0]) {
         int x = cntrlPoints[(0 + 0)*3 + 0];
         int y = cntrlPoints[(0 + 0)*3 + 1];
         ofDrawLine(x-350, y, x+350, y);
@@ -241,7 +258,7 @@ void ofxBezierWarp::drawWarpGrid(float x, float y, float w, float h) {
         ofDrawLine(x-150, y-150, x+150, y+150);
         ofDrawLine(x+150, y-150, x-150, y+150);
     }
-    if (showStarTR) {
+    if (showHelperOnCorner[1] || showHelperOnCornerMouse[1]) {
         int x = cntrlPoints[(0 + numYPoints)*3 + 0];
         int y = cntrlPoints[(0 + numYPoints)*3 + 1];
         ofDrawLine(x-350, y, x+350, y);
@@ -249,7 +266,7 @@ void ofxBezierWarp::drawWarpGrid(float x, float y, float w, float h) {
         ofDrawLine(x-150, y-150, x+150, y+150);
         ofDrawLine(x+150, y-150, x-150, y+150);
     }
-    if (showStarBR) {
+    if (showHelperOnCorner[2] || showHelperOnCornerMouse[2]) {
         int x = cntrlPoints[(numXPoints*numYPoints -1)*3 + 0];
         int y = cntrlPoints[(numXPoints*numYPoints -1)*3 + 1];
         ofDrawLine(x-350, y, x+350, y);
@@ -257,7 +274,7 @@ void ofxBezierWarp::drawWarpGrid(float x, float y, float w, float h) {
         ofDrawLine(x-150, y-150, x+150, y+150);
         ofDrawLine(x+150, y-150, x-150, y+150);
     }
-    if (showStarBL) {
+    if (showHelperOnCorner[3] || showHelperOnCornerMouse[3]) {
         int x = cntrlPoints[(numXPoints*(numYPoints-1))*3 + 0];
         int y = cntrlPoints[(numXPoints*(numYPoints-1))*3 + 1];
         ofDrawLine(x-350, y, x+350, y);
@@ -523,33 +540,37 @@ void ofxBezierWarp::mouseMoved(ofMouseEventArgs & e) {
     }
 
     // check if a corner-Point is touched
+    // Upper Left
     if (
             (currentCntrlY_2 == 0 && currentCntrlX_2 == 0)
             ) {
-        showStarTL = true;
+        showHelperOnCornerMouse[0] = true;
     } else {
-        showStarTL = false;
+        showHelperOnCornerMouse[0] = false;
     }
+    // Upper Right
     if (
             (currentCntrlY_2 == 0 && currentCntrlX_2 == numXPoints - 1)
             ) {
-        showStarTR = true;
+        showHelperOnCornerMouse[1] = true;
     } else {
-        showStarTR = false;
+        showHelperOnCornerMouse[1] = false;
     }
+    // Lower Left
     if (
             (currentCntrlY_2 == numYPoints - 1 && currentCntrlX_2 == 0)
             ) {
-        showStarBL = true;
+        showHelperOnCornerMouse[3] = true;
     } else {
-        showStarBL = false;
+        showHelperOnCornerMouse[3] = false;
     }
+    // Lower Right
         if (
             (currentCntrlY_2 == numYPoints - 1 && currentCntrlX_2 == numXPoints - 1)
             ) {
-        showStarBR = true;
+            showHelperOnCornerMouse[2] = true;
     } else {
-        showStarBR = false;
+            showHelperOnCornerMouse[2] = false;
     }
 
 }
